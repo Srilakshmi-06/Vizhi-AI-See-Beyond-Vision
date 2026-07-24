@@ -1,20 +1,29 @@
 # Python
 __pycache__/
 *.py[cod]
+*.pyo
 
 # Virtual Environment
 venv/
+.venv/
+
+# Environment
 .env
 
 # Uploads
 uploads/
 
-# Model weights
-*.pt
-
-# IDE
+# VS Code
 .vscode/
+
+# JetBrains
 .idea/
 
-# OS
+# Logs
+*.log
+
+# macOS
 .DS_Store
+
+# Windows
+Thumbs.db
