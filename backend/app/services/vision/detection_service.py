@@ -19,11 +19,24 @@ def detect_objects(image_path: str):
             confidence = float(box.conf[0])
 
             class_name = model.names[class_id]
+            # How do we calculate position?
+            # YOLO gives bounding box coordinates
+            x1, y1, x2, y2 = box.xyxy[0].tolist()
+            center_x = (x1 + x2) / 2
+            image_width = result.orig_shape[1]
 
+            if center_x < image_width / 3:
+                position = "left"
+            elif center_x < (2 * image_width / 3):
+                position = "center"
+            else:
+                position = "right"
+                
             detected_objects.append(
                 {
-                    "name": class_name,
-                    "confidence": round(confidence, 2)
+                   "name": class_name,
+                   "confidence": round(confidence, 2),
+                   "position": position
                 }
             )
 

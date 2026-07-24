@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual Environment
+venv/
+.venv/
+
+# Environment
+.env
+
+# Uploads
+uploads/
+
+# VS Code
+.vscode/
+
+# JetBrains
+.idea/
+
+# Logs
+*.log
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db

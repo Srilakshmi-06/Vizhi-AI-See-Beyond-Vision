@@ -42,3 +42,6 @@ def planner_llm(query: str):
     )
 
     return response["message"]["content"].strip()
+
+def describe_scene(objects):
+    ...
