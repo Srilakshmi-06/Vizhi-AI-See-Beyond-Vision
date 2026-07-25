@@ -31,7 +31,10 @@ def detect_objects(image_path: str):
                 position = "center"
             else:
                 position = "right"
-                
+
+            if confidence < 0.5:
+                continue
+            
             detected_objects.append(
                 {
                    "name": class_name,

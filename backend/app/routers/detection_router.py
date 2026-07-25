@@ -1,4 +1,5 @@
 from fastapi import APIRouter, UploadFile, File
+from app.utils.file_utils import save_uploaded_file
 import shutil
 import os
 
@@ -13,12 +14,7 @@ router = APIRouter(
 @router.post("/")
 async def detect(file: UploadFile = File(...)):
 
-    os.makedirs("uploads", exist_ok=True)
-
-    image_path = f"uploads/{file.filename}"
-
-    with open(image_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+    image_path = save_uploaded_file(file) 
 
     objects = detect_objects(image_path)
 

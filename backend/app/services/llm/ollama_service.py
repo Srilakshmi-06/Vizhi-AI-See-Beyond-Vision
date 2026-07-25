@@ -44,4 +44,44 @@ def planner_llm(query: str):
     return response["message"]["content"].strip()
 
 def describe_scene(objects):
-    ...
+
+    if not objects:
+        return "I couldn't detect any significant objects around you."
+
+    object_list = []
+
+    for obj in objects:
+        object_list.append(
+            f"- {obj['name']} ({obj['position']})"
+        )
+
+    prompt = f"""
+You are Vizhi AI, an accessibility assistant for visually impaired users.
+
+Detected objects:
+
+{objects}
+
+Rules:
+
+- ONLY describe the detected objects.
+- NEVER invent locations such as behind, far away, or nearby.
+- ONLY use left, center, or right.
+- NEVER assume movement.
+- NEVER greet the user.
+- Mention important obstacles first.
+- Keep the response below 35 words.
+- Speak clearly and naturally.
+"""
+
+    response = chat(
+        model=MODEL,
+        messages=[
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ]
+    )
+
+    return response["message"]["content"].strip()
