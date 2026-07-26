@@ -6,7 +6,7 @@ import os
 from app.services.vision.ocr_service import extract_text
 
 router = APIRouter(
-    prefix="/ocr",
+    prefix="/api/ocr",
     tags=["OCR"]
 )
 

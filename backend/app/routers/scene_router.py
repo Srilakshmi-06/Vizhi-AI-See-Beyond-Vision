@@ -6,7 +6,7 @@ import os
 from app.services.vision.scene_service import generate_scene_description
 
 router = APIRouter(
-    prefix="/scene",
+    prefix="/api/scene",
     tags=["Scene Description"]
 )
 

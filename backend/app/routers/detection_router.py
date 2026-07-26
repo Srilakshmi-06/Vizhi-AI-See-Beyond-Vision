@@ -6,7 +6,7 @@ import os
 from app.services.vision.detection_service import detect_objects
 
 router = APIRouter(
-    prefix="/detect",
+    prefix="/api/detect",
     tags=["Object Detection"]
 )
 

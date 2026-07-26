@@ -4,7 +4,7 @@ from app.utils.file_utils import save_uploaded_file
 from app.services.speech.whisper_service import transcribe_audio
 
 router = APIRouter(
-    prefix="/speech",
+    prefix="/api/speech",
     tags=["Speech"]
 )
 
