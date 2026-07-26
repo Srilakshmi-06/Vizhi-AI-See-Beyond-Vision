@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vizhi AI - Accessibility Companion Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" data-testid="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fa-solid fa-eye"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>Vizhi AI</h1>
+                    <span>Accessibility Companion</span>
+                </div>
+            </div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <span class="nav-label">Overview</span>
+                <a href="#dashboard" class="nav-item active" data-tab="dashboard" data-testid="nav-dashboard">
+                    <i class="fa-solid fa-gauge-high"></i>
+                    <span>Dashboard</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <span class="nav-label">AI Vision</span>
+                <a href="#live-camera" class="nav-item" data-tab="live-camera" data-testid="nav-live-camera">
+                    <i class="fa-solid fa-video"></i>
+                    <span>Live Camera</span>
+                    <span class="badge badge-primary">Core</span>
+                </a>
+                <a href="#detection" class="nav-item" data-tab="detection" data-testid="nav-detection">
+                    <i class="fa-solid fa-object-group"></i>
+                    <span>Object Detection</span>
+                </a>
+                <a href="#ocr" class="nav-item" data-tab="ocr" data-testid="nav-ocr">
+                    <i class="fa-solid fa-file-lines"></i>
+                    <span>Read Text (OCR)</span>
+                </a>
+                <a href="#scene" class="nav-item" data-tab="scene" data-testid="nav-scene">
+                    <i class="fa-solid fa-mountain-sun"></i>
+                    <span>Scene Description</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <span class="nav-label">AI Voice</span>
+                <a href="#voice-assistant" class="nav-item" data-tab="voice-assistant" data-testid="nav-voice-assistant">
+                    <i class="fa-solid fa-microphone-lines"></i>
+                    <span>Voice Assistant</span>
+                    <span class="badge badge-primary">Core</span>
+                </a>
+                <a href="#speech" class="nav-item" data-tab="speech" data-testid="nav-speech">
+                    <i class="fa-solid fa-waveform-lines"></i>
+                    <span>Speech to Text</span>
+                </a>
+                <a href="#tts" class="nav-item" data-tab="tts" data-testid="nav-tts">
+                    <i class="fa-solid fa-volume-high"></i>
+                    <span>Text to Speech</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <span class="nav-label">Assistance</span>
+                <a href="#navigation" class="nav-item" data-tab="navigation" data-testid="nav-navigation">
+                    <i class="fa-solid fa-route"></i>
+                    <span>Navigation</span>
+                </a>
+                <a href="#emergency" class="nav-item" data-tab="emergency" data-testid="nav-emergency">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>Emergency SOS</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <span class="nav-label">System</span>
+                <a href="#api-docs" class="nav-item" data-tab="api-docs" data-testid="nav-api-docs">
+                    <i class="fa-solid fa-code"></i>
+                    <span>API Reference</span>
+                </a>
+            </div>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <div class="system-status" data-testid="system-status">
+                <div class="status-indicator online"></div>
+                <div class="status-info">
+                    <span class="status-label">System Status</span>
+                    <span class="status-value" id="system-status-text">Online</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Top Bar -->
+        <header class="topbar">
+            <button class="menu-toggle" id="menu-toggle" data-testid="menu-toggle">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="topbar-title">
+                <h2 id="page-title">Dashboard</h2>
+                <p id="page-subtitle">Real-time accessibility monitoring</p>
+            </div>
+            <div class="topbar-actions">
+                <div class="version-badge">v2.0</div>
+                <a href="/docs" target="_blank" class="btn btn-secondary" data-testid="btn-swagger-docs">
+                    <i class="fa-solid fa-book"></i>
+                    <span>Swagger</span>
+                </a>
+            </div>
+        </header>
+
+        <!-- Content Area -->
+        <div class="content">
+            <!-- Dashboard Tab -->
+            <section class="tab-content active" id="tab-dashboard">
+                <div class="hero-card">
+                    <div class="hero-content">
+                        <div class="hero-badge">
+                            <i class="fa-solid fa-sparkles"></i>
+                            <span>AI-Powered Accessibility</span>
+                        </div>
+                        <h1>Welcome to <span class="gradient-text">Vizhi AI</span></h1>
+                        <p>Your multi-agent accessibility companion. Real-time obstacle detection, voice assistance, and hands-free navigation for visually impaired users.</p>
+                        <div class="hero-actions">
+                            <button class="btn btn-primary" data-tab="live-camera" data-testid="btn-start-monitoring">
+                                <i class="fa-solid fa-play"></i>
+                                <span>Start Live Monitoring</span>
+                            </button>
+                            <button class="btn btn-secondary" data-tab="voice-assistant" data-testid="btn-try-voice">
+                                <i class="fa-solid fa-microphone"></i>
+                                <span>Try Voice Assistant</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="hero-visual">
+                        <div class="pulse-circle">
+                            <i class="fa-solid fa-eye"></i>
+                            <div class="pulse-ring"></div>
+                            <div class="pulse-ring pulse-ring-2"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card" data-testid="stat-active-features">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);">
+                            <i class="fa-solid fa-layer-group"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value">9</span>
+                            <span class="stat-label">Active Features</span>
+                        </div>
+                    </div>
+                    <div class="stat-card" data-testid="stat-ai-models">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #10b981, #06b6d4);">
+                            <i class="fa-solid fa-brain"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value">5</span>
+                            <span class="stat-label">AI Models</span>
+                        </div>
+                    </div>
+                    <div class="stat-card" data-testid="stat-response-time">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b, #ef4444);">
+                            <i class="fa-solid fa-bolt"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value">500ms</span>
+                            <span class="stat-label">Frame Rate</span>
+                        </div>
+                    </div>
+                    <div class="stat-card" data-testid="stat-uptime">
+                        <div class="stat-icon" style="background: linear-gradient(135deg, #ec4899, #8b5cf6);">
+                            <i class="fa-solid fa-shield-halved"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value">99.9%</span>
+                            <span class="stat-label">Reliability</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="features-grid">
+                    <h3 class="section-title">Available Features</h3>
+                    <div class="features-list">
+                        <div class="feature-card" data-tab="live-camera" data-testid="feature-live-camera">
+                            <div class="feature-icon"><i class="fa-solid fa-video"></i></div>
+                            <h4>Live Camera Monitoring</h4>
+                            <p>Real-time obstacle detection with priority-based voice warnings</p>
+                            <div class="feature-tags">
+                                <span class="tag">YOLOv8</span>
+                                <span class="tag">Safety Agent</span>
+                            </div>
+                        </div>
+                        <div class="feature-card" data-tab="voice-assistant" data-testid="feature-voice-assistant">
+                            <div class="feature-icon"><i class="fa-solid fa-microphone-lines"></i></div>
+                            <h4>Voice Assistant</h4>
+                            <p>Complete voice-to-voice interaction with AI intelligence</p>
+                            <div class="feature-tags">
+                                <span class="tag">Whisper</span>
+                                <span class="tag">Edge TTS</span>
+                            </div>
+                        </div>
+                        <div class="feature-card" data-tab="ocr" data-testid="feature-ocr">
+                            <div class="feature-icon"><i class="fa-solid fa-file-lines"></i></div>
+                            <h4>Text Reading (OCR)</h4>
+                            <p>Read signs, labels, menus, and documents aloud</p>
+                            <div class="feature-tags">
+                                <span class="tag">EasyOCR</span>
+                            </div>
+                        </div>
+                        <div class="feature-card" data-tab="scene" data-testid="feature-scene">
+                            <div class="feature-icon"><i class="fa-solid fa-mountain-sun"></i></div>
+                            <h4>Scene Description</h4>
+                            <p>Natural language descriptions of your surroundings</p>
+                            <div class="feature-tags">
+                                <span class="tag">Llama 3.2</span>
+                                <span class="tag">YOLO</span>
+                            </div>
+                        </div>
+                        <div class="feature-card" data-tab="navigation" data-testid="feature-navigation">
+                            <div class="feature-icon"><i class="fa-solid fa-route"></i></div>
+                            <h4>Smart Navigation</h4>
+                            <p>Obstacle-aware directions to your destination</p>
+                            <div class="feature-tags">
+                                <span class="tag">Beta</span>
+                            </div>
+                        </div>
+                        <div class="feature-card" data-tab="emergency" data-testid="feature-emergency">
+                            <div class="feature-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                            <h4>Emergency SOS</h4>
+                            <p>Instant emergency alerts and location sharing</p>
+                            <div class="feature-tags">
+                                <span class="tag">SOS</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Live Camera Tab -->
+            <section class="tab-content" id="tab-live-camera">
+                <div class="feature-header">
+                    <div>
+                        <h2><i class="fa-solid fa-video"></i> Live Camera Monitoring</h2>
+                        <p>Continuously analyzes camera frames for obstacles and dangers</p>
+                    </div>
+                    <div class="feature-status" id="stream-status">
+                        <span class="status-dot"></span>
+                        <span>Not Monitoring</span>
+                    </div>
+                </div>
+
+                <div class="split-layout">
+                    <div class="camera-panel">
+                        <div class="camera-container">
+                            <video id="camera-video" autoplay playsinline muted></video>
+                            <canvas id="camera-canvas" style="display: none;"></canvas>
+                            <div class="camera-placeholder" id="camera-placeholder">
+                                <i class="fa-solid fa-camera"></i>
+                                <p>Click "Start Camera" to begin</p>
+                            </div>
+                            <div class="camera-overlay" id="camera-overlay"></div>
+                        </div>
+                        <div class="camera-controls">
+                            <button class="btn btn-primary" id="start-camera-btn" data-testid="btn-start-camera">
+                                <i class="fa-solid fa-play"></i>
+                                <span>Start Camera</span>
+                            </button>
+                            <button class="btn btn-success" id="start-monitoring-btn" disabled data-testid="btn-start-monitoring-analysis">
+                                <i class="fa-solid fa-shield-halved"></i>
+                                <span>Start Monitoring</span>
+                            </button>
+                            <button class="btn btn-danger" id="stop-camera-btn" disabled data-testid="btn-stop-camera">
+                                <i class="fa-solid fa-stop"></i>
+                                <span>Stop</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="analysis-panel">
+                        <div class="panel-card">
+                            <h3><i class="fa-solid fa-triangle-exclamation"></i> Safety Warnings</h3>
+                            <div class="warnings-list" id="warnings-list" data-testid="warnings-list">
+                                <div class="empty-state">
+                                    <i class="fa-solid fa-shield-check"></i>
+                                    <p>No warnings. Start monitoring to see alerts.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel-card">
+                            <h3><i class="fa-solid fa-list-check"></i> Detected Objects</h3>
+                            <div class="objects-list" id="objects-list" data-testid="objects-list">
+                                <div class="empty-state">
+                                    <i class="fa-solid fa-object-group"></i>
+                                    <p>No objects detected yet.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel-card">
+                            <h3><i class="fa-solid fa-chart-line"></i> Statistics</h3>
+                            <div class="stats-row">
+                                <div class="mini-stat">
+                                    <span class="mini-stat-value" id="frames-analyzed">0</span>
+                                    <span class="mini-stat-label">Frames</span>
+                                </div>
+                                <div class="mini-stat">
+                                    <span class="mini-stat-value" id="warnings-issued">0</span>
+                                    <span class="mini-stat-label">Warnings</span>
+                                </div>
+                                <div class="mini-stat">
+                                    <span class="mini-stat-value" id="avg-response-time">-</span>
+                                    <span class="mini-stat-label">Avg (ms)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <audio id="warning-audio" style="display: none;"></audio>
+            </section>
+
+            <!-- Object Detection Tab -->
+            <section class="tab-content" id="tab-detection">
+                <div class="feature-header">
+                    <div>
+                        <h2><i class="fa-solid fa-object-group"></i> Object Detection</h2>
+                        <p>Upload an image to detect objects using YOLOv8</p>
+                    </div>
+                </div>
+
+                <div class="upload-area" id="detection-upload" data-testid="detection-upload">
+                    <input type="file" id="detection-file" accept="image/*" hidden>
+                    <div class="upload-content">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        <h3>Drop image here or click to upload</h3>
+                        <p>Supports JPG, PNG, WebP</p>
+                    </div>
+                </div>
+
+                <div class="results-container" id="detection-results" style="display: none;">
+                    <div class="split-layout">
+                        <div class="image-preview">
+                            <img id="detection-image-preview" alt="Uploaded image">
+                        </div>
+                        <div class="panel-card">
+                            <h3><i class="fa-solid fa-list"></i> Detected Objects</h3>
+                            <div id="detection-objects-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- OCR Tab -->
+            <section class="tab-content" id="tab-ocr">
+                <div class="feature-header">
+                    <div>
+                        <h2><i class="fa-solid fa-file-lines"></i> Read Text (OCR)</h2>
+                        <p>Extract text from images using EasyOCR</p>
+                    </div>
+                </div>
+
+                <div class="upload-area" id="ocr-upload" data-testid="ocr-upload">
+                    <input type="file" id="ocr-file" accept="image/*" hidden>
+                    <div class="upload-content">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        <h3>Drop image with text here</h3>
+                        <p>Signs, menus, labels, documents...</p>
+                    </div>
+                </div>
+
+                <div class="results-container" id="ocr-results" style="display: none;">
+                    <div class="split-layout">
+                        <div class="image-preview">
+                            <img id="ocr-image-preview" alt="Uploaded image">
+                        </div>
+                        <div class="panel-card">
+                            <h3><i class="fa-solid fa-quote-left"></i> Extracted Text</h3>
+                            <div class="text-result" id="ocr-text-result"></div>
+                            <button class="btn btn-primary" id="ocr-play-audio" style="display: none;" data-testid="btn-ocr-play-audio">
+                                <i class="fa-solid fa-volume-high"></i>
+                                <span>Play Audio</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Scene Description Tab -->
+            <section class="tab-content" id="tab-scene">
+                <div class="feature-header">
+                    <div>
+                        <h2><i class="fa-solid fa-mountain-sun"></i> Scene Description</h2>
+                        <p>Get natural language descriptions of environments</p>
+                    </div>
+                </div>
+
+                <div class="upload-area" id="scene-upload" data-testid="scene-upload">
+                    <input type="file" id="scene-file" accept="image/*" hidden>
+                    <div class="upload-content">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        <h3>Upload scene image</h3>
+                        <p>Get AI-powered description</p>
+                    </div>
+                </div>
+
+                <div class="results-container" id="scene-results" style="display: none;">
+                    <div class="split-layout">
+                        <div class="image-preview">
+                            <img id="scene-image-preview" alt="Uploaded image">
+                        </div>
+                        <div class="panel-card">
+                            <h3><i class="fa-solid fa-message"></i> Description</h3>
+                            <div class="text-result" id="scene-text-result"></div>
+                            <div id="scene-objects-list" style="margin-top: 16px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Voice Assistant Tab -->
+            <section class="tab-content" id="tab-voice-assistant">
+                <div class="feature-header">
+                    <div>
+                        <h2><i class="fa-solid fa-microphone-lines"></i> Voice Assistant</h2>
+                        <p>Complete voice-to-voice interaction with AI</p>
+                    </div>
+                </div>
+
+                <div class="voice-assistant-layout">
+                    <div class="voice-card">
+                        <div class="voice-content">
+                            <div class="mic-button" id="mic-button" data-testid="mic-button">
+                                <i class="fa-solid fa-microphone"></i>
+                                <div class="mic-ripple"></div>
+                            </div>
+                            <p class="voice-status" id="voice-status">Click microphone or type command</p>
+                        </div>
+
+                        <div class="voice-input-group">
+                            <input type="text" id="voice-input-text" placeholder="Or type a command: 'Read the sign', 'What's around me?'" data-testid="voice-input-text">
+                            <div class="voice-input-actions">
+                                <label class="btn btn-secondary" for="voice-image-file">
+                                    <i class="fa-solid fa-image"></i>
+                                    <span>Add Image</span>
+                                    <input type="file" id="voice-image-file" accept="image/*" hidden>
+                                </label>
+                                <button class="btn btn-primary" id="voice-submit-btn" data-testid="btn-voice-submit">
+                                    <i class="fa-solid fa-paper-plane"></i>
+                                    <span>Send</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="voice-image-preview-container" style="display: none;">
+                            <img id="voice-image-preview" alt="Selected image">
+                        </div>
+                    </div>
+
+                    <div class="conversation-panel" id="conversation-panel" data-testid="conversation-panel">
+                        <div class="conversation-header">
+                            <h3><i class="fa-solid fa-comments"></i> Conversation</h3>
+                            <button class="btn btn-ghost" id="clear-conversation" data-testid="btn-clear-conversation">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                        <div class="conversation-messages" id="conversation-messages">
+                            <div class="empty-state">
+                                <i class="fa-solid fa-comments"></i>
+                                <p>Start a conversation with Vizhi AI</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Speech to Text Tab -->
+            <section class="tab-content" id="tab-speech">
+                <div class="feature-header">
+                    <div>
+                        <h2><i class="fa-solid fa-waveform-lines"></i> Speech to Text</h2>
+                        <p>Convert audio to text using Faster Whisper</p>
+                    </div>
+                </div>
+
+                <div class="upload-area" id="speech-upload" data-testid="speech-upload">
+                    <input type="file" id="speech-file" accept="audio/*" hidden>
+                    <div class="upload-content">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        <h3>Upload audio file</h3>
+                        <p>WAV, MP3, M4A supported</p>
+                    </div>
+                </div>
+
+                <div class="results-container" id="speech-results" style="display: none;">
+                    <div class="panel-card">
+                        <h3><i class="fa-solid fa-file-audio"></i> Transcription</h3>
+                        <div class="text-result" id="speech-text-result"></div>
+                        <div class="meta-info">
+                            <span><i class="fa-solid fa-language"></i> Language: <strong id="speech-language">-</strong></span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TTS Tab -->
+            <section class="tab-content" id="tab-tts">
+                <div class="feature-header">
+                    <div>
+                        <h2><i class="fa-solid fa-volume-high"></i> Text to Speech</h2>
+                        <p>Convert text to natural voice using Edge TTS</p>
+                    </div>
+                </div>
+
+                <div class="tts-container">
+                    <div class="panel-card">
+                        <label class="form-label">Text to convert</label>
+                        <textarea id="tts-text" placeholder="Enter text to convert to speech..." rows="4" data-testid="tts-text-input"></textarea>
+                        
+                        <label class="form-label" style="margin-top: 16px;">Voice</label>
+                        <select id="tts-voice" data-testid="tts-voice-select">
+                            <option value="en-US-AriaNeural">Aria (US Female)</option>
+                            <option value="en-US-GuyNeural">Guy (US Male)</option>
+                            <option value="en-US-JennyNeural">Jenny (US Female)</option>
+                            <option value="en-GB-SoniaNeural">Sonia (UK Female)</option>
+                            <option value="en-GB-RyanNeural">Ryan (UK Male)</option>
+                            <option value="en-IN-NeerjaNeural">Neerja (India Female)</option>
+                            <option value="en-IN-PrabhatNeural">Prabhat (India Male)</option>
+                            <option value="en-AU-NatashaNeural">Natasha (Australia Female)</option>
+                        </select>
+
+                        <button class="btn btn-primary btn-full" id="tts-generate-btn" style="margin-top: 20px;" data-testid="btn-tts-generate">
+                            <i class="fa-solid fa-play"></i>
+                            <span>Generate Audio</span>
+                        </button>
+
+                        <div id="tts-audio-container" style="display: none; margin-top: 24px;">
+                            <audio id="tts-audio-player" controls></audio>
+                        </div>
+                    </div>
+
+                    <div class="panel-card">
+                        <h3><i class="fa-solid fa-lightbulb"></i> Quick Presets</h3>
+                        <div class="preset-buttons">
+                            <button class="preset-btn" data-preset="Welcome to Vizhi AI. How can I help you today?" data-testid="preset-welcome">
+                                <i class="fa-solid fa-hand-wave"></i>
+                                Welcome
+                            </button>
+                            <button class="preset-btn" data-preset="Caution! Vehicle ahead. Please stop." data-testid="preset-warning">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                                Warning
+                            </button>
+                            <button class="preset-btn" data-preset="The path is clear. You can continue walking." data-testid="preset-clear">
+                                <i class="fa-solid fa-circle-check"></i>
+                                Path Clear
+                            </button>
+                            <button class="preset-btn" data-preset="Emergency services have been notified. Help is on the way." data-testid="preset-emergency">
+                                <i class="fa-solid fa-phone-volume"></i>
+                                Emergency
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Navigation Tab -->
+            <section class="tab-content" id="tab-navigation">
+                <div class="feature-header">
+                    <div>
+                        <h2><i class="fa-solid fa-route"></i> Navigation Assistant</h2>
+                        <p>Get directions with obstacle awareness</p>
+                    </div>
+                </div>
+
+                <div class="tts-container">
+                    <div class="panel-card">
+                        <h3>Navigate To</h3>
+                        <label class="form-label">Destination</label>
+                        <input type="text" id="nav-destination" placeholder="e.g., Library, Kitchen, Bathroom..." data-testid="nav-destination">
+                        
+                        <label class="form-label" style="margin-top: 16px;">Current Location (Optional)</label>
+                        <input type="text" id="nav-current-location" placeholder="e.g., Living Room" data-testid="nav-current-location">
+
+                        <button class="btn btn-primary btn-full" id="nav-navigate-btn" style="margin-top: 20px;" data-testid="btn-nav-navigate">
+                            <i class="fa-solid fa-location-arrow"></i>
+                            <span>Get Directions</span>
+                        </button>
+
+                        <div id="nav-result" style="display: none; margin-top: 24px;">
+                            <div class="alert alert-info">
+                                <i class="fa-solid fa-info-circle"></i>
+                                <span id="nav-instruction"></span>
+                            </div>
+                            <audio id="nav-audio" controls style="width: 100%; margin-top: 12px;"></audio>
+                        </div>
+                    </div>
+
+                    <div class="panel-card">
+                        <h3><i class="fa-solid fa-compass"></i> Quick Directions</h3>
+                        <div class="direction-grid">
+                            <button class="direction-btn" data-direction="forward" data-testid="direction-forward">
+                                <i class="fa-solid fa-arrow-up"></i>
+                                <span>Forward</span>
+                            </button>
+                            <button class="direction-btn" data-direction="left" data-testid="direction-left">
+                                <i class="fa-solid fa-arrow-left"></i>
+                                <span>Left</span>
+                            </button>
+                            <button class="direction-btn" data-direction="right" data-testid="direction-right">
+                                <i class="fa-solid fa-arrow-right"></i>
+                                <span>Right</span>
+                            </button>
+                            <button class="direction-btn" data-direction="backward" data-testid="direction-backward">
+                                <i class="fa-solid fa-arrow-down"></i>
+                                <span>Backward</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Emergency Tab -->
+            <section class="tab-content" id="tab-emergency">
+                <div class="feature-header">
+                    <div>
+                        <h2><i class="fa-solid fa-triangle-exclamation"></i> Emergency SOS</h2>
+                        <p>Instant emergency alerts and notifications</p>
+                    </div>
+                </div>
+
+                <div class="emergency-container">
+                    <div class="sos-card">
+                        <div class="sos-badge">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                            <span>Emergency Alert System</span>
+                        </div>
+                        <h2>Need Immediate Help?</h2>
+                        <p>Press the SOS button below to trigger an emergency alert. Emergency services will be notified with your location.</p>
+                        
+                        <div class="emergency-form">
+                            <label class="form-label">Emergency Type</label>
+                            <select id="emergency-type" data-testid="emergency-type">
+                                <option value="general">General Emergency</option>
+                                <option value="medical">Medical Emergency</option>
+                                <option value="accident">Accident</option>
+                            </select>
+
+                            <label class="form-label" style="margin-top: 12px;">Location (Optional)</label>
+                            <input type="text" id="emergency-location" placeholder="Your current location" data-testid="emergency-location">
+                        </div>
+
+                        <button class="sos-button" id="sos-button" data-testid="btn-sos">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                            <span>TRIGGER SOS</span>
+                        </button>
+
+                        <div id="emergency-result" style="display: none;"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- API Docs Tab -->
+            <section class="tab-content" id="tab-api-docs">
+                <div class="feature-header">
+                    <div>
+                        <h2><i class="fa-solid fa-code"></i> API Reference</h2>
+                        <p>Quick reference for all endpoints</p>
+                    </div>
+                    <a href="/docs" target="_blank" class="btn btn-primary" data-testid="btn-full-docs">
+                        <i class="fa-solid fa-external-link"></i>
+                        <span>Full Swagger Docs</span>
+                    </a>
+                </div>
+
+                <div class="api-list" id="api-list">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="/app.js"></script>
+</body>
+</html>

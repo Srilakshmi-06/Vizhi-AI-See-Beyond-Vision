@@ -1,5 +1,7 @@
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from app.routers.planner_router import router as planner_router
 from app.routers.detection_router import router as detection_router
 from app.routers.ocr_router import router as ocr_router
@@ -17,16 +19,16 @@ app = FastAPI(
     version="2.0"
 )
 
-# CORS Configuration for Flutter app
+# CORS Configuration for Flutter app and Dashboard UI
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify your Flutter app's origin
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Include all routers
+# Include all API routers
 app.include_router(planner_router)
 app.include_router(detection_router)
 app.include_router(ocr_router)
@@ -38,11 +40,15 @@ app.include_router(stream_router)
 app.include_router(navigation_router)
 app.include_router(emergency_router)
 
+
 @app.get("/")
-def home():
+def api_root():
+    """API root endpoint. Web dashboard is served by the frontend on port 3000."""
     return {
         "message": "Welcome to Vizhi AI 🚀",
         "version": "2.0",
+        "docs": "/docs",
+        "dashboard": "The web dashboard is served on port 3000 (frontend service)",
         "features": [
             "Object Detection",
             "OCR (Text Reading)",
@@ -56,6 +62,7 @@ def home():
         ]
     }
 
+
 @app.get("/health")
 def health():
-    return {"status": "running", "service": "Vizhi AI Backend"}
+    return {"status": "running", "service": "Vizhi AI Backend", "version": "2.0"}

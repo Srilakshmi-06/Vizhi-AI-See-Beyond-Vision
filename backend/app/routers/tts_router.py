@@ -2,7 +2,7 @@ from fastapi import APIRouter, Form, HTTPException
 from fastapi.responses import FileResponse
 import os
 
-from app.services.speech.tts_service import text_to_speech
+from app.services.speech.tts_service import text_to_speech_async
 
 router = APIRouter(
     prefix="/api/tts",
@@ -26,7 +26,7 @@ async def convert_text_to_speech(
         Audio file (MP3)
     """
     try:
-        audio_path = text_to_speech(text, voice)
+        audio_path = await text_to_speech_async(text, voice)
         
         if not os.path.exists(audio_path):
             raise HTTPException(status_code=500, detail="Failed to generate audio")
