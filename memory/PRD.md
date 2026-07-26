@@ -1,11 +1,11 @@
 # Vizhi AI - Product Requirements Document
 
 ## Original Problem Statement
-Build **Vizhi AI**, a production-ready multi-agent accessibility application for visually impaired users. Extend an existing FastAPI + Flutter project feature-by-feature without breaking existing architecture.
+Build **Vizhi AI**, a production-ready multi-agent accessibility application for visually impaired users. Extend an existing FastAPI + Flutter project feature-by-feature without breaking existing architecture. Transform the web dashboard into a voice-first, accessibility-focused product suitable for a national-level hackathon demonstration.
 
 ## Architecture
-- **Backend:** FastAPI on port 8001 (Python)
-- **Frontend Dashboard:** Node.js/Express static server on port 3000 (serves HTML/CSS/JS)
+- **Backend:** FastAPI on port 8001 (Python) — 10 API routers, 5 AI models
+- **Frontend Dashboard:** Node.js/Express static server on port 3000 (serves index.html, style.css, app.js)
 - **Mobile Client:** Flutter (external, not in this repo)
 - **AI Stack:** YOLOv8, EasyOCR, Faster Whisper, Ollama (Llama 3.2), Edge TTS
 - **Storage:** File-based (uploads/, audio_outputs/), SQLite planned
@@ -13,7 +13,7 @@ Build **Vizhi AI**, a production-ready multi-agent accessibility application for
 ## User Personas
 1. **Visually Impaired End User** - Uses Flutter mobile app for hands-free accessibility
 2. **Developer / Integrator** - Uses web dashboard for testing all API endpoints
-3. **Stakeholder / Demo Viewer** - Uses dashboard to see the system in action
+3. **Hackathon Judge / Stakeholder** - Sees full system capabilities on Live Mode dashboard
 
 ## Core Requirements (Static)
 1. Continuous camera monitoring with obstacle warnings (500-1000ms frame rate)
@@ -23,146 +23,120 @@ Build **Vizhi AI**, a production-ready multi-agent accessibility application for
 5. Scene description in natural language
 6. Emergency SOS system
 7. Navigation assistance with obstacle awareness
+8. **Accessibility-first UI**: large targets (52px+), high contrast (WCAG AAA), clear focus rings, screen-reader announcements
 
-## What's Been Implemented (Session 1 - July 2025)
+## What's Been Implemented
 
-### Backend Features ✅
-- **Edge TTS Service** - Async/sync text-to-speech with 100+ voices
-- **Safety Agent** - Smart obstacle warnings with 3-tier priority (high/medium/low), 5-second cooldown, position tracking
-- **Live Camera Stream** - `POST /api/stream/analyze` for continuous frame analysis
-- **Enhanced Voice Assistant** - Full voice-to-voice flow with all agents
-- **Navigation Service** - Direction guidance + destination navigation
-- **Emergency SOS** - Alert triggering with unique IDs
-- **All routers updated** with `/api` prefix (Kubernetes-ready)
-- **CORS enabled** for cross-origin requests
+### Session 1 (Backend)
+- Edge TTS service, Safety Agent, Live Stream endpoint
+- Enhanced Voice Assistant, Navigation, Emergency SOS routers
+- All routes under `/api/*`, CORS enabled
 
-### Frontend Dashboard ✅ (Session 2 - Just Completed)
-- **Modern SPA Dashboard** built with vanilla HTML/CSS/JS (Space Grotesk font, dark theme)
-- **11 Feature Pages:**
-  - Dashboard (hero + stats + feature grid)
-  - Live Camera (real-time monitoring with browser camera API)
-  - Object Detection (drag-and-drop upload)
-  - OCR (text reading with audio playback)
-  - Scene Description (AI descriptions)
-  - Voice Assistant (mic recording + conversation UI)
-  - Speech to Text (audio upload)
-  - Text to Speech (with 8 preset voices)
-  - Navigation (destination + direction pad)
-  - Emergency SOS (large trigger button)
-  - API Reference (all endpoints listed)
-- **Real-time features:**
-  - Live camera stream analysis (browser → backend every 800ms)
-  - Voice recording via MediaRecorder API
-  - Auto-play audio responses
-  - System health monitoring (30s interval)
-  - Toast notifications
-- **Deployable via Express.js** on port 3000
-- **Data-testid attributes** on all interactive elements
+### Session 2 (Dashboard v1 - Modern SPA)
+- 11-page dashboard with tabbed navigation, dark theme
+- Live camera streaming, voice recording, TTS playback
+- API health monitoring, toast notifications
 
-### Infrastructure ✅
-- Supervisor running both backend + frontend
+### Session 3 (Accessibility Redesign — CURRENT)
+- **Live Mode is now the star dashboard**: 70% camera + right column (Voice + AI Status) + detection/scene cards + quick action bar
+- **Object Detection with Risk Classification**:
+  - HIGH (red): car, truck, bus, motorcycle, bicycle, stairs, pole, fire hydrant, traffic light, stop sign, knife
+  - MEDIUM (amber): person, chair, couch, dining table, bench, dog, cat, door
+  - LOW (green): bottle, book, backpack, cup, laptop, keyboard
+  - Cards sorted by risk priority, colored borders + icons + risk tags
+- **Voice Assistant Orb** with 4 states: idle / listening (red pulse) / processing (blue spin) / speaking (green breathe)
+- **AI Status Panel** with per-service dots (green/yellow/red) — polls planner endpoint every 45s
+- **Camera states** properly managed: idle (with "Start Camera" prompt), loading spinner, error state with retry, ready with HUD overlay
+- **Quick Action Bar**: Read Text / Describe / Navigate / Emergency SOS — large 88px+ buttons
+- **Live warning banner** overlaid on camera feed for immediate visual + audio warnings
+- **Collapsible sidebar** with icons + labels + grouped sections
+- **Voice suggestions chips** for common commands
+- **Scene description card** auto-refreshes every 20s during monitoring
+- **Skip-to-content link** for screen readers
+- **`aria-live` regions** for warnings, toasts, and status
+- **Focus rings** (3px yellow) for keyboard navigation
+- **Base font 18px**, line-height 1.55, min button height 52px (large touch targets)
+- **Reduced-motion support** for users with vestibular disorders
+- **Responsive breakpoints**: 1280px / 1100px / 768px / 480px
+
+### Infrastructure
+- Supervisor running backend + frontend
 - Backend hot-reload enabled
 - Static assets served by Node.js/Express (port 3000)
 - API served by FastAPI (port 8001)
 - All API calls routed via Kubernetes ingress
+- TTS sync wrapper uses ThreadPoolExecutor for calls from async endpoints
 
 ## What's NOT Yet Implemented
-- **Ollama** not installed in preview container (Planner agent + Scene Description need it)
-- **Real navigation API** (Google Maps / Mapbox integration)
-- **Real emergency contact system** (Twilio SMS / calls)
+- **Ollama** not installed in preview container → Planner & Scene Description show "DEGRADED"
+- **Real navigation API** (Google Maps / Mapbox)
+- **Real emergency contact system** (Twilio SMS/calls)
 - **User authentication** (JWT or Emergent Google Auth)
 - **GPS location tracking**
 - **Offline mode**
-- **Multi-language support**
+- **Multi-language STT/TTS**
+- **Distance estimation** for detected objects (placeholder shown)
+- **Bounding box overlays** on live camera feed
 
 ## Prioritized Backlog
 
-### P0 (Blocking for full functionality)
-- [ ] Install/configure Ollama for Planner Agent and Scene Description
-- [ ] Add distance estimation to Safety Agent (depth sensing)
+### P0 (Full Vision Needs Ollama)
+- [ ] Install Ollama + `ollama pull llama3.2:3b` for Planner Agent + Scene Description
 
-### P1 (High priority enhancements)
-- [ ] Integrate Google Maps API for real navigation
-- [ ] Integrate Twilio for emergency SMS/call
-- [ ] Add user authentication (JWT or Emergent Google Auth)
+### P1 (High Priority Enhancements)
+- [ ] Distance estimation (MonoDepth model or bounding box heuristics)
+- [ ] Bounding box overlays on live camera canvas
+- [ ] Google Maps / Mapbox integration for real navigation
+- [ ] Twilio for emergency SMS/call
+- [ ] User authentication (JWT or Emergent Google Auth)
 - [ ] GPS location tracking
 
-### P2 (Nice-to-have)
-- [ ] Multi-language support (STT + TTS + LLM)
+### P2 (Polish)
+- [ ] Multi-language support (STT + TTS + LLM prompts)
 - [ ] Offline mode with cached models
+- [ ] Guardian mapping (share location with trusted contact)
+- [ ] Conversation history persistence
+- [ ] AI Memory (personalization)
+- [ ] Voice-command settings page
 - [ ] Battery optimization (adaptive frame rate)
-- [ ] Personalization / route learning
-- [ ] Indoor navigation with beacons
-
-## Next Tasks
-1. Test all dashboard pages end-to-end (upload real images to detection/OCR)
-2. Install Ollama and pull llama3.2:3b for full agent routing
-3. Integrate with Flutter mobile app
-4. Add authentication for production
-5. Deploy to production infrastructure
 
 ## Files Structure
 ```
 /app/
 ├── backend/
-│   ├── server.py              # FastAPI entry point
-│   ├── requirements.txt       # Python dependencies (frozen)
-│   ├── yolov8n.pt            # YOLO model (~50MB)
+│   ├── server.py, requirements.txt, yolov8n.pt
 │   ├── app/
-│   │   ├── main.py           # FastAPI app + CORS + routers
-│   │   ├── routers/          # 10 API route modules
-│   │   ├── services/         # Business logic
-│   │   │   ├── vision/       # YOLO, EasyOCR, Scene
-│   │   │   ├── speech/       # Whisper (STT), Edge TTS
-│   │   │   ├── safety/       # Safety Agent (NEW)
-│   │   │   ├── planner/      # Query routing
-│   │   │   ├── assistant/    # Orchestration
-│   │   │   ├── navigation/   # Directions
-│   │   │   ├── emergency/    # SOS
-│   │   │   └── llm/          # Ollama integration
-│   │   ├── models/           # Pydantic models
-│   │   └── utils/            # Helpers
-│   ├── uploads/              # Temp image storage
-│   └── audio_outputs/        # Generated audio files
+│   │   ├── main.py (FastAPI + CORS + 10 routers)
+│   │   ├── routers/ (planner, detection, ocr, scene, speech, tts, stream, assistant, navigation, emergency)
+│   │   ├── services/ (vision, speech, safety, planner, assistant, navigation, emergency, llm)
+│   │   ├── models/, utils/
+│   ├── uploads/, audio_outputs/
 │
 ├── frontend/
-│   ├── package.json          # Express dependency
-│   ├── server.js             # Static file server (port 3000)
-│   ├── node_modules/
-│   └── public/
-│       ├── index.html        # Dashboard SPA
-│       ├── style.css         # Modern dark theme
-│       └── app.js            # All feature logic
+│   ├── package.json, server.js (Express port 3000)
+│   ├── public/
+│   │   ├── index.html    ← Live Mode dashboard + 10 tabs
+│   │   ├── style.css     ← Accessibility-first design tokens
+│   │   └── app.js        ← Voice states, risk classification, AI polling
 │
-├── memory/
-│   └── PRD.md                # This file
-│
-├── API_DOCUMENTATION.md       # Full API reference
-├── IMPLEMENTATION_SUMMARY.md  # Technical details
-├── OLLAMA_SETUP.md           # Ollama installation guide
-├── README.md                 # Project overview
-└── test_system.sh            # Automated test script
+├── memory/PRD.md (this file)
+├── API_DOCUMENTATION.md, IMPLEMENTATION_SUMMARY.md, OLLAMA_SETUP.md, README.md
+└── test_system.sh
 ```
 
 ## API Endpoints Summary
-- `GET /` - Backend API info
-- `GET /health` - Backend health check
-- `GET /docs` - Swagger UI
-- `POST /api/stream/analyze` - Live camera frame analysis (Core)
-- `POST /api/assistant/` - Voice assistant unified endpoint (Core)
-- `POST /api/detect/` - Object detection
-- `POST /api/ocr/` - Text reading
-- `POST /api/scene/` - Scene description
-- `POST /api/speech/` - Speech to text
-- `POST /api/tts/` - Text to speech
-- `GET /api/tts/voices` - List available voices
-- `POST /api/planner/` - Agent routing
-- `POST /api/navigation/navigate` - Get directions
-- `POST /api/navigation/direction` - Directional guidance
-- `POST /api/emergency/trigger` - SOS alert
-- `POST /api/emergency/cancel` - Cancel SOS
-- `GET /api/assistant/audio/{filename}` - Retrieve generated audio
+All backend endpoints under `/api/*` prefix:
+- Core: `/api/stream/analyze` (live camera), `/api/assistant/` (voice unified)
+- Vision: `/api/detect/`, `/api/ocr/`, `/api/scene/`
+- Voice: `/api/speech/`, `/api/tts/`, `/api/tts/voices`
+- AI: `/api/planner/`
+- Assist: `/api/navigation/navigate`, `/api/navigation/direction`
+- Safety: `/api/emergency/trigger`, `/api/emergency/cancel`
+- Audio serving: `/api/assistant/audio/{filename}`
+- Health: `/health`, `/api/emergency/health`, `/api/stream/health`
 
-## Testing
-Run `bash /app/test_system.sh` for automated tests.
-Access dashboard at the public preview URL for interactive testing.
+## Next Tasks
+1. Install Ollama in the preview environment for full Planner + Scene functionality
+2. Add bounding box overlays on live camera canvas
+3. Integrate with Flutter mobile app using the browser dashboard as reference
+4. Add JWT authentication before production deployment
