@@ -3,6 +3,8 @@ from app.routers.planner_router import router as planner_router
 from app.routers.detection_router import router as detection_router
 from app.routers.ocr_router import router as ocr_router
 from app.routers.scene_router import router as scene_router
+from app.routers.speech_router import router as speech_router
+from app.routers.assistant_router import router as assistant_router
 
 app = FastAPI(
     title="Vizhi AI",
@@ -14,6 +16,8 @@ app.include_router(planner_router)
 app.include_router(detection_router)
 app.include_router(ocr_router)
 app.include_router(scene_router)
+app.include_router(speech_router)
+app.include_router(assistant_router)
 
 @app.get("/")
 def home():
