@@ -1,6 +1,8 @@
+import os
 from ollama import chat
 
-MODEL = "llama3.2:3b"
+# Configurable via env variable — default to smaller model for constrained environments
+MODEL = os.environ.get("OLLAMA_MODEL", "llama3.2:1b")
 
 SYSTEM_PROMPT = """
 You are a routing classifier.

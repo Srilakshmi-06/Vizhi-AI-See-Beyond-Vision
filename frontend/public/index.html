@@ -571,14 +571,60 @@
 
                         <label class="form-label" for="tts-voice">Voice</label>
                         <select id="tts-voice" data-testid="tts-voice-select">
-                            <option value="en-US-AriaNeural">Aria (US, Female)</option>
-                            <option value="en-US-GuyNeural">Guy (US, Male)</option>
-                            <option value="en-US-JennyNeural">Jenny (US, Female)</option>
-                            <option value="en-GB-SoniaNeural">Sonia (UK, Female)</option>
-                            <option value="en-GB-RyanNeural">Ryan (UK, Male)</option>
-                            <option value="en-IN-NeerjaNeural">Neerja (IN, Female)</option>
-                            <option value="en-IN-PrabhatNeural">Prabhat (IN, Male)</option>
-                            <option value="en-AU-NatashaNeural">Natasha (AU, Female)</option>
+                            <optgroup label="English (US)">
+                                <option value="en-US-AriaNeural">Aria — Female</option>
+                                <option value="en-US-GuyNeural">Guy — Male</option>
+                                <option value="en-US-JennyNeural">Jenny — Female</option>
+                                <option value="en-US-DavisNeural">Davis — Male</option>
+                            </optgroup>
+                            <optgroup label="English (UK)">
+                                <option value="en-GB-SoniaNeural">Sonia — Female</option>
+                                <option value="en-GB-RyanNeural">Ryan — Male</option>
+                            </optgroup>
+                            <optgroup label="English (India)">
+                                <option value="en-IN-NeerjaNeural">Neerja — Female</option>
+                                <option value="en-IN-PrabhatNeural">Prabhat — Male</option>
+                            </optgroup>
+                            <optgroup label="English (Australia)">
+                                <option value="en-AU-NatashaNeural">Natasha — Female</option>
+                                <option value="en-AU-WilliamNeural">William — Male</option>
+                            </optgroup>
+                            <optgroup label="Hindi">
+                                <option value="hi-IN-SwaraNeural">Swara — Female</option>
+                                <option value="hi-IN-MadhurNeural">Madhur — Male</option>
+                            </optgroup>
+                            <optgroup label="Tamil">
+                                <option value="ta-IN-PallaviNeural">Pallavi — Female</option>
+                                <option value="ta-IN-ValluvarNeural">Valluvar — Male</option>
+                            </optgroup>
+                            <optgroup label="Telugu">
+                                <option value="te-IN-ShrutiNeural">Shruti — Female</option>
+                                <option value="te-IN-MohanNeural">Mohan — Male</option>
+                            </optgroup>
+                            <optgroup label="Spanish">
+                                <option value="es-ES-ElviraNeural">Elvira — Female</option>
+                                <option value="es-MX-DaliaNeural">Dalia — Mexican Female</option>
+                            </optgroup>
+                            <optgroup label="French">
+                                <option value="fr-FR-DeniseNeural">Denise — Female</option>
+                                <option value="fr-FR-HenriNeural">Henri — Male</option>
+                            </optgroup>
+                            <optgroup label="German">
+                                <option value="de-DE-KatjaNeural">Katja — Female</option>
+                                <option value="de-DE-ConradNeural">Conrad — Male</option>
+                            </optgroup>
+                            <optgroup label="Japanese">
+                                <option value="ja-JP-NanamiNeural">Nanami — Female</option>
+                                <option value="ja-JP-KeitaNeural">Keita — Male</option>
+                            </optgroup>
+                            <optgroup label="Chinese (Mandarin)">
+                                <option value="zh-CN-XiaoxiaoNeural">Xiaoxiao — Female</option>
+                                <option value="zh-CN-YunxiNeural">Yunxi — Male</option>
+                            </optgroup>
+                            <optgroup label="Arabic">
+                                <option value="ar-SA-ZariyahNeural">Zariyah — Female</option>
+                                <option value="ar-SA-HamedNeural">Hamed — Male</option>
+                            </optgroup>
                         </select>
 
                         <button class="btn-primary btn-lg btn-block" id="tts-generate-btn" data-testid="btn-tts-generate">
@@ -681,7 +727,7 @@
             ================================================= -->
             <section class="tab-panel" id="tab-emergency">
                 <div class="page-intro">
-                    <p>Trigger an emergency alert. Your location and emergency type will be logged.</p>
+                    <p>Trigger an emergency alert. Your location, emergency type, and contacts will be logged.</p>
                 </div>
 
                 <div class="emergency-wrap">
@@ -691,7 +737,7 @@
                             <span>Emergency Alert System</span>
                         </div>
                         <h2>Need Immediate Help?</h2>
-                        <p>Press the SOS button below to trigger an emergency alert. Vizhi AI will notify emergency services with your location.</p>
+                        <p>Press the SOS button below to trigger an emergency alert. Vizhi AI will notify emergency services and your saved contacts.</p>
 
                         <label class="form-label" for="emergency-type">Emergency type</label>
                         <select id="emergency-type" data-testid="emergency-type">
@@ -709,6 +755,29 @@
                         </button>
 
                         <div id="emergency-result" hidden></div>
+                    </div>
+
+                    <div class="live-card emergency-contacts-card">
+                        <div class="live-card-header">
+                            <h3><i class="fa-solid fa-address-book" aria-hidden="true"></i>Emergency Contacts</h3>
+                            <button class="link-btn" id="add-contact-btn" data-testid="btn-add-contact">
+                                <i class="fa-solid fa-plus" aria-hidden="true"></i>Add
+                            </button>
+                        </div>
+                        <div id="add-contact-form" hidden>
+                            <label class="form-label" for="contact-name">Name</label>
+                            <input type="text" id="contact-name" placeholder="e.g. Mom, Emergency Dept" data-testid="contact-name">
+                            <label class="form-label" for="contact-phone">Phone</label>
+                            <input type="text" id="contact-phone" placeholder="+1 555 123 4567" data-testid="contact-phone">
+                            <label class="form-label" for="contact-relation">Relationship</label>
+                            <input type="text" id="contact-relation" placeholder="e.g. Family, Doctor" data-testid="contact-relation">
+                            <div class="va-row" style="margin-top:12px">
+                                <button class="btn-secondary" id="cancel-contact-btn" data-testid="btn-cancel-contact">Cancel</button>
+                                <button class="btn-primary" id="save-contact-btn" data-testid="btn-save-contact">Save Contact</button>
+                            </div>
+                        </div>
+                        <div id="emergency-contacts-list" class="contacts-list" data-testid="contacts-list"></div>
+                        <p class="contacts-hint">Contacts are stored securely in your browser only.</p>
                     </div>
                 </div>
             </section>

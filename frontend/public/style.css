@@ -1893,15 +1893,142 @@ textarea::placeholder {
 ============================================ */
 .emergency-wrap {
     display: grid;
-    place-items: center;
-    padding: 20px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
 }
 
 .emergency-card {
-    max-width: 600px;
-    width: 100%;
     text-align: center;
     padding: 40px 32px;
+}
+
+.emergency-contacts-card {
+    padding: 20px;
+}
+
+.contacts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 12px;
+    min-height: 100px;
+}
+
+.contact-item {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    animation: itemSlideIn 0.28s ease;
+}
+
+.contact-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), #8b5cf6);
+    color: #001114;
+    display: grid;
+    place-items: center;
+    font-size: 1rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.contact-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-1);
+}
+
+.contact-phone {
+    font-size: 0.9rem;
+    color: var(--text-2);
+    font-family: monospace;
+}
+
+.contact-relation {
+    font-size: 0.78rem;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.contact-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.contact-btn {
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    background: var(--bg-4);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-2);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.contact-btn:hover {
+    background: var(--bg-2);
+    color: var(--text-1);
+}
+
+.contact-btn.danger:hover {
+    background: var(--danger-bg);
+    color: var(--danger);
+    border-color: var(--danger-border);
+}
+
+.contact-btn.primary:hover {
+    background: var(--accent);
+    color: #001114;
+    border-color: var(--accent);
+}
+
+.contacts-hint {
+    font-size: 0.82rem;
+    color: var(--text-4);
+    text-align: center;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    margin-top: 12px;
+}
+
+#add-contact-form {
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+@media (max-width: 1100px) {
+    .emergency-wrap {
+        grid-template-columns: 1fr;
+    }
+}
+
+.emergency-wrap > * {
+    max-width: 640px;
+    margin: 0 auto;
+    width: 100%;
 }
 
 .emergency-badge {

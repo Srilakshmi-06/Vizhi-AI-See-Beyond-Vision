@@ -457,6 +457,7 @@ async function analyzeFrame() {
         $('#hud-latency').textContent = `${avg} ms`;
 
         updateLiveDetections(data.objects || []);
+        drawBoundingBoxes(data.objects || []);
 
         if (data.warnings && data.warnings.length) {
             state.alertsTriggered += data.warnings.length;
@@ -468,6 +469,70 @@ async function analyzeFrame() {
         console.error('Frame analyze error', err);
         setServiceStatus('detection', 'degraded');
     }
+}
+
+// Draw bounding boxes on the camera overlay canvas
+function drawBoundingBoxes(objects) {
+    const video = $('#camera-video');
+    const canvas = $('#camera-overlay-canvas');
+    if (!canvas || !video || !video.videoWidth) return;
+
+    // Match overlay canvas resolution to video
+    if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+    }
+
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (!objects.length) return;
+
+    const RISK_COLORS = {
+        high: { stroke: '#f87171', fill: 'rgba(248, 113, 113, 0.15)', text: '#ffffff', bg: '#ef4444' },
+        medium: { stroke: '#fbbf24', fill: 'rgba(251, 191, 36, 0.15)', text: '#1e1400', bg: '#fbbf24' },
+        low: { stroke: '#4ade80', fill: 'rgba(74, 222, 128, 0.15)', text: '#001a08', bg: '#4ade80' },
+    };
+
+    objects.forEach((obj) => {
+        if (!obj.bbox) return;
+        const risk = getRisk(obj.name);
+        const colors = RISK_COLORS[risk];
+        const { x1, y1, x2, y2 } = obj.bbox;
+        const width = x2 - x1;
+        const height = y2 - y1;
+
+        // Draw semi-transparent fill
+        ctx.fillStyle = colors.fill;
+        ctx.fillRect(x1, y1, width, height);
+
+        // Draw stroke
+        ctx.strokeStyle = colors.stroke;
+        ctx.lineWidth = Math.max(3, canvas.width / 400);
+        ctx.strokeRect(x1, y1, width, height);
+
+        // Draw label background
+        const label = `${obj.name} ${Math.round(obj.confidence * 100)}%`;
+        ctx.font = `bold ${Math.max(14, canvas.width / 60)}px "Inter", sans-serif`;
+        const textWidth = ctx.measureText(label).width;
+        const padding = 8;
+        const labelHeight = Math.max(24, canvas.width / 40);
+
+        ctx.fillStyle = colors.bg;
+        ctx.fillRect(x1, y1 - labelHeight - 2, textWidth + padding * 2, labelHeight);
+
+        // Draw label text
+        ctx.fillStyle = colors.text;
+        ctx.textBaseline = 'middle';
+        ctx.fillText(label, x1 + padding, y1 - labelHeight / 2 - 2);
+    });
+}
+
+function clearBoundingBoxes() {
+    const canvas = $('#camera-overlay-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
 function showLiveWarning(text) {
@@ -504,6 +569,7 @@ function renderDetection(obj) {
     const icon = getObjectIcon(obj.name);
     const confidence = Math.round(obj.confidence * 100);
     const positionLabel = obj.position === 'center' ? 'Ahead' : obj.position === 'left' ? 'On Left' : 'On Right';
+    const distanceLabel = obj.distance_label || (obj.distance ? obj.distance : '~ Distance');
     return `
         <div class="detection-item risk-${risk}" role="listitem">
             <div class="detection-icon"><i class="fa-solid ${icon}" aria-hidden="true"></i></div>
@@ -511,7 +577,7 @@ function renderDetection(obj) {
                 <span class="detection-name">${obj.name}</span>
                 <div class="detection-meta">
                     <span><i class="fa-solid fa-location-crosshairs" aria-hidden="true"></i>${positionLabel}</span>
-                    <span><i class="fa-solid fa-ruler" aria-hidden="true"></i>~ Distance</span>
+                    <span><i class="fa-solid fa-ruler" aria-hidden="true"></i>${distanceLabel}</span>
                 </div>
             </div>
             <div class="detection-right">
@@ -562,6 +628,7 @@ function stopMonitoring() {
     if (state.sceneInterval) clearInterval(state.sceneInterval);
     state.monitoringInterval = null;
     state.sceneInterval = null;
+    clearBoundingBoxes();
 }
 
 // ============================================================
@@ -767,6 +834,7 @@ function addConversationMessage(role, text, agent, audioPath) {
         ? `<audio class="msg-audio" controls autoplay src="${API_BASE}/api/assistant/audio/${audioPath.split('/').pop()}"></audio>`
         : '';
     const agentHtml = agent ? `<span class="agent-tag">${agent}</span>` : '';
+    const timestamp = new Date().toLocaleTimeString();
 
     const el = document.createElement('div');
     el.className = `msg ${role}`;
@@ -774,11 +842,64 @@ function addConversationMessage(role, text, agent, audioPath) {
         <div class="msg-avatar"><i class="fa-solid ${iconClass}" aria-hidden="true"></i></div>
         <div class="msg-body">
             <div class="msg-bubble">${escapeHtml(text)}</div>
-            <div class="msg-meta">${agentHtml}<span>${new Date().toLocaleTimeString()}</span></div>
+            <div class="msg-meta">${agentHtml}<span>${timestamp}</span></div>
             ${audioHtml}
         </div>
     `;
     list.appendChild(el);
+    list.scrollTop = list.scrollHeight;
+
+    // Persist to localStorage
+    saveConversationMessage({ role, text, agent, timestamp });
+}
+
+// Conversation history persistence
+const CONVERSATION_KEY = 'vizhi_conversation_v1';
+const CONVERSATION_LIMIT = 50;
+
+function saveConversationMessage(msg) {
+    try {
+        const history = getConversationHistory();
+        history.push(msg);
+        // Keep only last 50 messages
+        const trimmed = history.slice(-CONVERSATION_LIMIT);
+        localStorage.setItem(CONVERSATION_KEY, JSON.stringify(trimmed));
+    } catch (e) { console.warn('Could not save conversation:', e); }
+}
+
+function getConversationHistory() {
+    try {
+        const stored = localStorage.getItem(CONVERSATION_KEY);
+        return stored ? JSON.parse(stored) : [];
+    } catch { return []; }
+}
+
+function clearConversationHistory() {
+    localStorage.removeItem(CONVERSATION_KEY);
+}
+
+function loadConversationHistory() {
+    const history = getConversationHistory();
+    if (!history.length) return;
+
+    const list = $('#va-conversation');
+    const empty = list.querySelector('.empty-panel');
+    if (empty) empty.remove();
+
+    history.forEach(msg => {
+        const iconClass = msg.role === 'user' ? 'fa-user' : 'fa-robot';
+        const agentHtml = msg.agent ? `<span class="agent-tag">${msg.agent}</span>` : '';
+        const el = document.createElement('div');
+        el.className = `msg ${msg.role}`;
+        el.innerHTML = `
+            <div class="msg-avatar"><i class="fa-solid ${iconClass}" aria-hidden="true"></i></div>
+            <div class="msg-body">
+                <div class="msg-bubble">${escapeHtml(msg.text)}</div>
+                <div class="msg-meta">${agentHtml}<span>${msg.timestamp}</span></div>
+            </div>
+        `;
+        list.appendChild(el);
+    });
     list.scrollTop = list.scrollHeight;
 }
 
@@ -1015,6 +1136,8 @@ async function triggerSOS() {
 
     const btn = $('#sos-btn');
     setBusy(btn, true, 'Alerting');
+    const contacts = getContacts();
+
     try {
         const fd = new FormData();
         fd.append('emergency_type', $('#emergency-type').value);
@@ -1025,6 +1148,15 @@ async function triggerSOS() {
         const res = await fetch(`${API_BASE}/api/emergency/trigger`, { method: 'POST', body: fd });
         const data = await res.json();
 
+        const contactsHtml = contacts.length ? `
+            <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);text-align:left">
+                <strong>Notified contacts:</strong>
+                <ul style="margin-top:8px;padding-left:20px">
+                    ${contacts.map(c => `<li>${escapeHtml(c.name)} — ${escapeHtml(c.phone)}</li>`).join('')}
+                </ul>
+            </div>
+        ` : '';
+
         $('#emergency-result').hidden = false;
         $('#emergency-result').innerHTML = `
             <div class="alert alert-success">
@@ -1033,6 +1165,7 @@ async function triggerSOS() {
                     <strong>Emergency Alert Sent</strong>
                     <p style="margin-top:6px">${data.message}</p>
                     <p style="margin-top:8px;font-family:monospace;font-size:0.85rem;opacity:0.8">ID: ${data.emergency_id}</p>
+                    ${contactsHtml}
                 </div>
             </div>
         `;
@@ -1040,7 +1173,7 @@ async function triggerSOS() {
             const filename = data.audio_path.split('/').pop();
             new Audio(`${API_BASE}/api/assistant/audio/${filename}`).play();
         }
-        showToast('SOS triggered', 'success');
+        showToast(`SOS triggered${contacts.length ? ` — ${contacts.length} contact(s) notified` : ''}`, 'success');
         announce('Emergency alert sent successfully.');
     } catch (err) {
         showToast('SOS trigger failed', 'error');
@@ -1048,6 +1181,102 @@ async function triggerSOS() {
         setBusy(btn, false);
         btn.innerHTML = '<i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i><span>TRIGGER SOS</span>';
     }
+}
+
+// ============================================================
+// Emergency Contacts (localStorage)
+// ============================================================
+const CONTACTS_KEY = 'vizhi_emergency_contacts_v1';
+
+function getContacts() {
+    try {
+        const stored = localStorage.getItem(CONTACTS_KEY);
+        return stored ? JSON.parse(stored) : [];
+    } catch { return []; }
+}
+
+function saveContacts(contacts) {
+    localStorage.setItem(CONTACTS_KEY, JSON.stringify(contacts));
+}
+
+function renderEmergencyContacts() {
+    const list = $('#emergency-contacts-list');
+    if (!list) return;
+    const contacts = getContacts();
+
+    if (!contacts.length) {
+        list.innerHTML = `
+            <div class="empty-panel">
+                <i class="fa-solid fa-user-plus" aria-hidden="true"></i>
+                <p>No emergency contacts added yet. Add someone who should be notified in an emergency.</p>
+            </div>
+        `;
+        return;
+    }
+
+    list.innerHTML = contacts.map((c, i) => {
+        const initials = c.name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+        return `
+            <div class="contact-item">
+                <div class="contact-avatar" aria-hidden="true">${initials}</div>
+                <div class="contact-info">
+                    <span class="contact-name">${escapeHtml(c.name)}</span>
+                    <span class="contact-phone">${escapeHtml(c.phone)}</span>
+                    ${c.relation ? `<span class="contact-relation">${escapeHtml(c.relation)}</span>` : ''}
+                </div>
+                <div class="contact-actions">
+                    <a class="contact-btn primary" href="tel:${encodeURIComponent(c.phone)}" title="Call ${escapeHtml(c.name)}" aria-label="Call ${escapeHtml(c.name)}">
+                        <i class="fa-solid fa-phone" aria-hidden="true"></i>
+                    </a>
+                    <button class="contact-btn danger" data-remove-contact="${i}" title="Remove contact" aria-label="Remove ${escapeHtml(c.name)}">
+                        <i class="fa-solid fa-trash" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    // Attach delete handlers
+    list.querySelectorAll('[data-remove-contact]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const idx = parseInt(btn.dataset.removeContact);
+            const cs = getContacts();
+            const removed = cs.splice(idx, 1)[0];
+            saveContacts(cs);
+            renderEmergencyContacts();
+            if (removed) showToast(`Removed ${removed.name}`, 'info');
+        });
+    });
+}
+
+function showAddContactForm(show) {
+    const form = $('#add-contact-form');
+    if (!form) return;
+    form.hidden = !show;
+    if (show) {
+        $('#contact-name').value = '';
+        $('#contact-phone').value = '';
+        $('#contact-relation').value = '';
+        setTimeout(() => $('#contact-name').focus(), 50);
+    }
+}
+
+function saveNewContact() {
+    const name = $('#contact-name').value.trim();
+    const phone = $('#contact-phone').value.trim();
+    const relation = $('#contact-relation').value.trim();
+
+    if (!name || !phone) {
+        showToast('Please enter name and phone', 'warning');
+        return;
+    }
+
+    const contacts = getContacts();
+    contacts.push({ name, phone, relation, addedAt: new Date().toISOString() });
+    saveContacts(contacts);
+    renderEmergencyContacts();
+    showAddContactForm(false);
+    showToast(`${name} added`, 'success');
 }
 
 // ============================================================
@@ -1177,12 +1406,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     $('#va-clear').addEventListener('click', () => {
+        clearConversationHistory();
         $('#va-conversation').innerHTML = `
             <div class="empty-panel">
                 <i class="fa-solid fa-comments" aria-hidden="true"></i>
                 <p>Start a conversation with Vizhi AI</p>
             </div>
         `;
+        showToast('Conversation cleared', 'info');
     });
 
     // TTS
@@ -1202,9 +1433,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Emergency
     $('#sos-btn').addEventListener('click', triggerSOS);
+    $('#add-contact-btn').addEventListener('click', () => showAddContactForm(true));
+    $('#cancel-contact-btn').addEventListener('click', () => showAddContactForm(false));
+    $('#save-contact-btn').addEventListener('click', saveNewContact);
 
     // API list
     renderApiList();
+
+    // Load conversation history from localStorage
+    loadConversationHistory();
+
+    // Load emergency contacts
+    renderEmergencyContacts();
 
     // AI services status
     checkAiServices();
