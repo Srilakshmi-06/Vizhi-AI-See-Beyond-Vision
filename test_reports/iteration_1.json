@@ -1,0 +1,23 @@
+{
+  "summary": "Vizhi AI backend fully verified. Ollama connectivity, llama3.2:1b model, Planner Agent (7/7 correct routing including all critical: OCR, Navigation, Emergency), Scene Description (returns objects with bbox+distance_label AND non-empty description referencing detected objects), Object Detection (bbox with x1/y1/x2/y2/image_width/image_height, distance, distance_label, area_ratio), Stream analyze, and all regression endpoints (OCR, TTS, TTS voices, Emergency trigger/cancel, Navigation, Assistant, /health) all pass. 16/16 pytest tests green in 43s. First planner call after warmup returns in <7s (well under 30s frontend threshold).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_vizhi_backend.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "planner_router.py uses sync `def` for the endpoint but calls an LLM (blocking) — under load this will block the FastAPI event loop. Consider `async def` + run_in_executor or making decide_agent async.",
+    "scene_router.py and detection_router.py similarly do heavy CPU work (YOLO, Ollama) inside async endpoints without awaiting — consider offloading to a threadpool.",
+    "No auth on any endpoint (acceptable for MVP but should be flagged for production).",
+    "TTS endpoint returns raw FileResponse; audio files under audio_outputs/ appear to be unbounded — add cleanup/TTL."
+  ],
+  "updated_files": ["/app/backend/tests/test_vizhi_backend.py"],
+  "success_rate": {"backend": "100%", "frontend": "not tested (per request)"},
+  "test_credentials": "none required",
+  "seed_data_creation": "Uses /tmp/test_scene.jpg (bus image from ultralytics) — auto-downloaded by fixture if missing.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "test_vizhi_backend.py is the canonical regression suite. Ollama runs via supervisor. Planner first call after cold-start can take ~30s; the fixture uses 90s timeout for the first query and 60s subsequently. All planner queries routed correctly (7/7) with llama3.2:1b at temperature=0."
+}
