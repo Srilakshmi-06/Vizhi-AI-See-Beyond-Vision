@@ -6,7 +6,7 @@
 // ============================================================
 // Configuration
 // ============================================================
-const API_BASE = window.location.origin;
+const API_BASE = 'http://localhost:8001';  // Change this if your backend is hosted elsewhere
 
 const RISK = {
     HIGH: 'high',
@@ -831,7 +831,7 @@ function addConversationMessage(role, text, agent, audioPath) {
 
     const iconClass = role === 'user' ? 'fa-user' : 'fa-robot';
     const audioHtml = audioPath
-        ? `<audio class="msg-audio" controls autoplay src="${API_BASE}/api/assistant/audio/${audioPath.split('/').pop()}"></audio>`
+        ? `<audio class="msg-audio" controls autoplay src="${API_BASE}/api/assistant/audio/${getAudioFilename(audioPath)}"></audio>`
         : '';
     const agentHtml = agent ? `<span class="agent-tag">${agent}</span>` : '';
     const timestamp = new Date().toLocaleTimeString();
@@ -906,13 +906,23 @@ function loadConversationHistory() {
 // ============================================================
 // Audio playback helper
 // ============================================================
+function getAudioFilename(path) {
+    if (!path) return '';
+    return path.split(/[/\\]/).pop();
+}
+
 function playAudioPath(path, onEnded) {
-    const filename = path.split('/').pop();
+    const filename = getAudioFilename(path);
+    if (!filename) return;
+
     const src = `${API_BASE}/api/assistant/audio/${filename}`;
     const audio = $('#warning-audio');
+
+    audio.pause();
     audio.src = src;
-    audio.play().catch(err => console.warn('Audio play blocked:', err));
+    audio.load();
     if (onEnded) audio.onended = onEnded;
+    audio.play().catch(err => console.warn('Audio play blocked:', err));
 }
 
 async function speakText(text, onEnded) {
@@ -1101,7 +1111,7 @@ async function requestNavigation() {
         $('#nav-result').hidden = false;
         $('#nav-instruction').textContent = data.instruction;
         if (data.audio_path) {
-            const filename = data.audio_path.split('/').pop();
+            const filename = getAudioFilename(data.audio_path);
             $('#nav-audio').src = `${API_BASE}/api/assistant/audio/${filename}`;
             $('#nav-audio').play();
         }
@@ -1122,7 +1132,7 @@ async function requestDirection(direction) {
         const data = await res.json();
         showToast(data.instruction, 'info');
         if (data.audio_path) {
-            const filename = data.audio_path.split('/').pop();
+            const filename = getAudioFilename(data.audio_path);
             const audio = new Audio(`${API_BASE}/api/assistant/audio/${filename}`);
             audio.play();
         }
@@ -1170,7 +1180,7 @@ async function triggerSOS() {
             </div>
         `;
         if (data.audio_path) {
-            const filename = data.audio_path.split('/').pop();
+            const filename = getAudioFilename(data.audio_path);
             new Audio(`${API_BASE}/api/assistant/audio/${filename}`).play();
         }
         showToast(`SOS triggered${contacts.length ? ` — ${contacts.length} contact(s) notified` : ''}`, 'success');
