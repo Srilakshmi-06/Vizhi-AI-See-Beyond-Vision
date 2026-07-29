@@ -45,7 +45,7 @@ async def analyze_frame(file: UploadFile = File(...)):
         safety_agent = get_safety_agent()
         
         # Analyze frame for safety
-        safety_analysis = safety_agent.analyze_frame(detected_objects)
+        safety_analysis = safety_agent.analyze_frame(detected_objects, image_path=image_path)
         
         response = {
             "objects": detected_objects,

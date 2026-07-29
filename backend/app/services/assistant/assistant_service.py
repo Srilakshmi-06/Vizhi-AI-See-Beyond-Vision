@@ -3,6 +3,7 @@ from app.services.planner.planner_service import decide_agent
 from app.services.vision.ocr_service import extract_text
 from app.services.vision.detection_service import detect_objects
 from app.services.vision.scene_service import generate_scene_description
+from app.services.safety.safety_agent import get_safety_agent
 from app.services.speech.tts_service import text_to_speech
 from app.models.assistant_response import AssistantResponse
 import logging
@@ -40,12 +41,17 @@ def process_request(user_input: str, image_path: str, include_audio: bool = True
     elif agent == "Object Detection":
 
         objects = detect_objects(image_path)
-        
+        safety_agent = get_safety_agent()
+        safety_analysis = safety_agent.analyze_frame(objects, image_path=image_path)
+
         if objects:
-            object_names = [obj["name"] for obj in objects]
-            response_text = f"I can see: {', '.join(object_names)}."
+            if safety_analysis["warnings"]:
+                response_text = " ".join(safety_analysis["warnings"])
+            else:
+                object_names = [obj["name"] for obj in objects]
+                response_text = f"I can see: {', '.join(object_names)}."
         else:
-            response_text = "I couldn't detect any objects."
+            response_text = "I couldn't detect any objects. The path ahead appears clear."
 
     elif agent == "Scene Description":
 

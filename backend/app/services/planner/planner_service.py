@@ -19,6 +19,32 @@ def decide_agent(query: str):
         }
     """
 
+    normalized = (query or "").strip().lower()
+
+    # Hard-coded phrase matching for voice commands and safety-critical phrases
+    if any(phrase in normalized for phrase in [
+        "read the sign", "what does this say", "read the menu", "read this label"
+    ]):
+        return {"agent": "OCR"}
+
+    if any(phrase in normalized for phrase in [
+        "describe my surroundings", "describe the room", "where am i", "what do you see", "what is around me"
+    ]):
+        return {"agent": "Scene Description"}
+
+    if any(phrase in normalized for phrase in [
+        "what is in front of me", "what is ahead", "what is ahead of me", "is there anything ahead"
+    ]):
+        return {"agent": "Object Detection"}
+
+    if any(phrase in normalized for phrase in [
+        "take me to", "guide me", "how do i get", "navigate", "direction", "where is " ]):
+        return {"agent": "Navigation"}
+
+    if any(phrase in normalized for phrase in [
+        "help", "sos", "emergency", "i need help", "call for help"]):
+        return {"agent": "Emergency"}
+
     raw_response = planner_llm(query).strip().lower()
 
     # Exact match

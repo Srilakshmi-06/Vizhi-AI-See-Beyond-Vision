@@ -148,6 +148,7 @@ const state = {
     alertsTriggered: 0,
     responseTimes: [],
     warningCooldown: new Map(),
+    monitoringSuspended: false,
 
     voiceState: 'idle',           // idle | listening | processing | speaking
     isRecording: false,
@@ -622,8 +623,36 @@ function pauseMonitoring() {
     showToast('Monitoring paused', 'info');
 }
 
-function stopMonitoring() {
+function suspendMonitoringForVoice() {
+    if (!state.monitoring || state.monitoringSuspended) return;
+    state.monitoringSuspended = true;
+    stopMonitoring(true);
+    const btn = $('#start-monitoring-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i><span>Waiting…</span>';
+    setHudStatus('ready', 'Monitoring paused for voice command');
+}
+
+function resumeMonitoringAfterVoice() {
+    if (!state.stream || !state.monitoringSuspended) return;
+    state.monitoringSuspended = false;
+    state.monitoring = true;
+    state.monitoringInterval = setInterval(analyzeFrame, 900);
+    state.sceneInterval = setInterval(refreshLiveScene, 20000);
+    refreshLiveScene();
+    const btn = $('#start-monitoring-btn');
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-pause" aria-hidden="true"></i><span>Pause Monitoring</span>';
+    btn.onclick = pauseMonitoring;
+    setHudStatus('monitoring', 'Live Monitoring');
+    showToast('Monitoring resumed', 'success');
+}
+
+function stopMonitoring(preserveSuspended = false) {
     state.monitoring = false;
+    if (!preserveSuspended) {
+        state.monitoringSuspended = false;
+    }
     if (state.monitoringInterval) clearInterval(state.monitoringInterval);
     if (state.sceneInterval) clearInterval(state.sceneInterval);
     state.monitoringInterval = null;
@@ -750,6 +779,11 @@ async function handleTranscription(audioBlob, orbSel, chipSel) {
 }
 
 async function handleLiveVoiceCommand(text, orbSel, chipSel) {
+    const wasMonitoring = state.monitoring;
+    if (wasMonitoring) {
+        suspendMonitoringForVoice();
+    }
+
     setVoiceState('processing', orbSel, chipSel, `"${text}" — processing…`);
 
     try {
@@ -769,11 +803,15 @@ async function handleLiveVoiceCommand(text, orbSel, chipSel) {
 
             setVoiceState('speaking', orbSel, chipSel, data.response || 'Done.');
             if (data.audio_path) {
-                playAudioPath(data.audio_path, () => {
+                playVoiceResponseAudio(data.audio_path, () => {
                     setVoiceState('idle', orbSel, chipSel, 'Tap the microphone to speak');
+                    if (wasMonitoring) resumeMonitoringAfterVoice();
                 });
             } else {
-                setTimeout(() => setVoiceState('idle', orbSel, chipSel, 'Tap the microphone to speak'), 3000);
+                speakText(data.response || 'Done.', () => {
+                    setVoiceState('idle', orbSel, chipSel, 'Tap the microphone to speak');
+                    if (wasMonitoring) resumeMonitoringAfterVoice();
+                }, '#voice-response-audio');
             }
         } else {
             // Text-only planner
@@ -785,12 +823,16 @@ async function handleLiveVoiceCommand(text, orbSel, chipSel) {
             const data = await res.json();
             const response = `To handle "${text}", the ${data.agent} agent is needed. Please start the camera first for vision-based tasks.`;
             setVoiceState('speaking', orbSel, chipSel, response);
-            speakText(response, () => setVoiceState('idle', orbSel, chipSel, 'Tap the microphone to speak'));
+            speakText(response, () => {
+                setVoiceState('idle', orbSel, chipSel, 'Tap the microphone to speak');
+                if (wasMonitoring) resumeMonitoringAfterVoice();
+            }, '#voice-response-audio');
         }
     } catch (err) {
         console.error(err);
         setVoiceState('idle', orbSel, chipSel, 'Something went wrong. Tap to try again.');
         showToast('Voice command failed', 'error');
+        if (wasMonitoring) resumeMonitoringAfterVoice();
     }
 }
 
@@ -925,7 +967,21 @@ function playAudioPath(path, onEnded) {
     audio.play().catch(err => console.warn('Audio play blocked:', err));
 }
 
-async function speakText(text, onEnded) {
+function playVoiceResponseAudio(path, onEnded) {
+    const filename = getAudioFilename(path);
+    if (!filename) return;
+
+    const src = `${API_BASE}/api/assistant/audio/${filename}`;
+    const audio = $('#voice-response-audio');
+
+    audio.pause();
+    audio.src = src;
+    audio.load();
+    if (onEnded) audio.onended = onEnded;
+    audio.play().catch(err => console.warn('Voice response audio play blocked:', err));
+}
+
+async function speakText(text, onEnded, audioElementSelector = '#warning-audio') {
     try {
         const fd = new FormData();
         fd.append('text', text);
@@ -934,7 +990,8 @@ async function speakText(text, onEnded) {
         const res = await fetch(`${API_BASE}/api/tts/`, { method: 'POST', body: fd });
         setServiceStatus('tts', 'online');
         const blob = await res.blob();
-        const audio = $('#warning-audio');
+        const audio = $(audioElementSelector);
+        if (!audio) return;
         audio.src = URL.createObjectURL(blob);
         audio.play();
         if (onEnded) audio.onended = onEnded;

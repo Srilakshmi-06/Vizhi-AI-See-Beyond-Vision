@@ -90,19 +90,21 @@ class SafetyAgent:
             return 3
         return 4
     
-    def analyze_frame(self, detected_objects: List[Dict]) -> Dict:
+    def analyze_frame(self, detected_objects: List[Dict], image_path: Optional[str] = None) -> Dict:
         """
         Analyze detected objects and generate safety warnings.
         
         Args:
             detected_objects: List of detected objects from YOLO
                              Each object: {"name": str, "confidence": float, "position": str}
+            image_path: Optional path to the frame image for additional scene heuristics
         
         Returns:
             {
                 "warnings": List of warning messages,
                 "dangerous_objects": List of dangerous objects detected,
-                "safe": Boolean indicating if environment is safe
+                "safe": Boolean indicating if environment is safe,
+                "total_objects": int
             }
         """
         # Clean old warnings periodically
@@ -130,6 +132,15 @@ class SafetyAgent:
                 if self.should_warn(object_name, position):
                     warning = self._generate_warning(object_name, position)
                     warnings.append(warning)
+
+        if image_path:
+            warnings.extend(self._detect_wall_hazards(image_path))
+
+        if not self._has_center_obstacle(detected_objects):
+            if not detected_objects:
+                warnings.insert(0, "Clear path ahead.")
+            else:
+                warnings.insert(0, "Clear path ahead. Stay aware of nearby obstacles.")
         
         return {
             "warnings": warnings,
@@ -138,6 +149,75 @@ class SafetyAgent:
             "total_objects": len(detected_objects)
         }
     
+    def _has_center_obstacle(self, detected_objects: List[Dict]) -> bool:
+        """
+        Determine whether there is a meaningful obstacle in the center of the view.
+        """
+        for obj in detected_objects:
+            if obj.get("position") == "center" and self.get_priority(obj.get("name", "")) <= 2:
+                return True
+        return False
+
+    def _detect_wall_hazards(self, image_path: str) -> List[str]:
+        """
+        Use edge heuristics to detect walls or large obstructions near the edges of the frame.
+        """
+        warnings = []
+        try:
+            import cv2
+            import numpy as np
+        except ImportError:
+            return warnings
+
+        image = cv2.imread(image_path)
+        if image is None:
+            return warnings
+
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+        edges = cv2.Canny(blurred, 50, 150)
+
+        lines = cv2.HoughLinesP(
+            edges,
+            rho=1,
+            theta=np.pi / 180,
+            threshold=80,
+            minLineLength=int(min(image.shape[:2]) * 0.3),
+            maxLineGap=30
+        )
+
+        if lines is None:
+            return warnings
+
+        counts = {"left": 0, "center": 0, "right": 0}
+        height, width = gray.shape
+
+        for line in lines:
+            coords = np.asarray(line).reshape(-1)
+            if coords.size < 4:
+                continue
+            x1, y1, x2, y2 = coords[:4]
+            dx = x2 - x1
+            dy = y2 - y1
+            if abs(dx) > abs(dy) * 0.4:
+                continue
+            mid_x = (x1 + x2) / 2
+            if mid_x < width * 0.33:
+                counts["left"] += 1
+            elif mid_x > width * 0.66:
+                counts["right"] += 1
+            else:
+                counts["center"] += 1
+
+        if counts["left"] >= 3:
+            warnings.append("There may be a wall or obstruction on your left.")
+        if counts["right"] >= 3:
+            warnings.append("There may be a wall or obstruction on your right.")
+        if counts["center"] >= 4:
+            warnings.append("There appears to be an obstacle ahead.")
+
+        return warnings
+
     def _generate_warning(self, object_name: str, position: str) -> str:
         """
         Generate warning message for an object.
@@ -163,10 +243,14 @@ class SafetyAgent:
                 return f"Warning! {object_name.capitalize()} {position_text}."
             else:
                 return f"Alert! {object_name.capitalize()} {position_text}."
-        
-        # Regular warnings
-        return f"{object_name.capitalize()} {position_text}."
 
+        # Medium risk objects should trigger careful walking guidance
+        if object_name in PRIORITY_MEDIUM:
+            return f"Walk carefully, there is a {object_name} {position_text}."
+
+        # Lower priority obstacles and other objects
+        return f"Watch out, there is a {object_name} {position_text}."
+ 
 
 # Global safety agent instance
 _safety_agent = SafetyAgent(warning_cooldown_seconds=5)
