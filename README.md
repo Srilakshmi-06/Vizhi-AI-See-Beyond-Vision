@@ -1,4 +1,4 @@
-# 🚀 Vizhi AI - Multi-Agent Accessibility Companion
+ # 🚀 Vizhi AI - Multi-Agent Accessibility Companion
 
 > **Production-ready AI accessibility application for visually impaired users**
 
